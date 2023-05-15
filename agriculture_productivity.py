@@ -36,11 +36,14 @@ def read_clean_transpose(filename):
     # Make 'Country Name' the index
     data_frame.set_index('Country Name', inplace=True)
     # Delete unwanted columns
-    data_frame.drop(labels = [ 'Country Code', 'Indicator Name', 'Indicator Code'], axis = 1, inplace = True)
+    data_frame.drop(labels = [ 'Country Code', 'Indicator Name', \
+                                   'Indicator Code'], axis = 1, inplace = True)
     # Delete empty rows
-    data_frame.dropna(axis = 0, how = 'all', thresh = None, subset = None, inplace = True)
+    data_frame.dropna(axis = 0, how = 'all', thresh = None, subset = None, \
+                                                                inplace = True)
     # Delete empty columns
-    data_frame.dropna(axis = 1, how = 'all', thresh = None, subset = None, inplace = True)
+    data_frame.dropna(axis = 1, how = 'all', thresh = None, subset = None, \
+                                                                inplace = True)
     # Transpose the cleaned data
     clean_df_transpose = data_frame.transpose()
     # Set 'Year' as the index of the transposed data frame
@@ -59,14 +62,16 @@ def agriculture_forest_clustering_analysis():
     forest_2020 = forest[["Country Name", "2020"]].copy()
     agriculture_2020 = agriculture_2020[agriculture_2020["2020"].notna()]
     forest_2020 = forest_2020[forest_2020["2020"].notna()]
-    agriculture_forest = pd.merge(agriculture_2020, forest_2020, on = "Country Name", how = "outer")
+    agriculture_forest = pd.merge(agriculture_2020, forest_2020, on = \
+                                                  "Country Name", how = "outer")
     agriculture_forest = agriculture_forest.dropna()
-    agriculture_forest = agriculture_forest.rename(columns = {"2020_x":"agriculture", "2020_y":"forest"})
+    agriculture_forest = agriculture_forest.rename(columns = \
+                                    {"2020_x":"agriculture", "2020_y":"forest"})
     agriculture_forest.to_excel("agr_for2020.xlsx")                                              
     agr_forest_cluster = agriculture_forest[["agriculture", "forest"]].copy()
     #perform normalization before clustering                                              
     agr_forest_cluster, df_min, df_max = ct.scaler(agr_forest_cluster)
-    # loop over number of clusters to find out best silhouette score for clustering
+    # loop over number of clusters to find out best silhouette score
     for ncluster in range(2, 10):
         # set up the clusterer with the number of expected clusters
         kmeans = cluster.KMeans(n_clusters = ncluster)
@@ -96,7 +101,8 @@ def agriculture_forest_clustering_analysis():
     plt.figure(figsize = (8.0, 8.0))
     cm = plt.cm.get_cmap('tab10')
     #plot the real values and real cluster centers
-    plt.scatter(agriculture_forest["agriculture"], agriculture_forest["forest"], 10, labels, marker = "o", cmap = cm, label ='cluster')
+    plt.scatter(agriculture_forest["agriculture"], agriculture_forest["forest"]\
+                        , 10, labels, marker = "o", cmap = cm, label ='cluster')
     plt.scatter(xc, yc, c = "k", marker = "d", s = 80)
     plt.xlabel("agriculture")
     plt.ylabel("forest")
@@ -114,11 +120,14 @@ def arable_land_cereal_yield_clustering_analysis():
     cereal_yield_2020 = cereal_yield[["Country Name", "2020"]].copy()
     arable_land_2020 = arable_land_2020[arable_land_2020["2020"].notna()]
     cereal_yield_2020 = cereal_yield_2020[cereal_yield_2020["2020"].notna()]
-    arable_vs_cereal = pd.merge(arable_land_2020,  cereal_yield_2020, on = "Country Name", how = "outer")
+    arable_vs_cereal = pd.merge(arable_land_2020,  cereal_yield_2020, on = \
+                                                "Country Name", how = "outer")
     arable_vs_cereal = arable_vs_cereal.dropna()
-    arable_vs_cereal = arable_vs_cereal.rename(columns={"2020_x":"Arable_land", "2020_y":"Cereal_yield"})
+    arable_vs_cereal = arable_vs_cereal.rename(columns = \
+                             {"2020_x":"Arable_land", "2020_y":"Cereal_yield"})
     arable_vs_cereal.to_excel("cereal_agr2020.xlsx")                                              
-    arable_vs_cereal_cluster = arable_vs_cereal[["Arable_land", "Cereal_yield"]].copy()                                              
+    arable_vs_cereal_cluster = arable_vs_cereal[["Arable_land", "Cereal_yield"]]\
+                                                                        .copy()                                              
     # normalise
     arable_vs_cereal_cluster, df_min, df_max = ct.scaler(arable_vs_cereal_cluster)
     for ncluster in range(2, 10):
@@ -154,7 +163,8 @@ def arable_land_cereal_yield_clustering_analysis():
     # cluster by cluster
     plt.figure(figsize=(8.0, 8.0))
     cm = plt.cm.get_cmap('tab10')
-    plt.scatter(arable_vs_cereal["Arable_land"], arable_vs_cereal["Cereal_yield"], 10, labels, marker = "o", cmap = cm, label ='cluster')
+    plt.scatter(arable_vs_cereal["Arable_land"], arable_vs_cereal["Cereal_yield"],\
+                            10, labels, marker = "o", cmap = cm, label ='cluster')
     plt.scatter(xc, yc, c = "k", marker = "d", s = 80)
     #plt.scatter(xcen, ycen, 45, "k", marker="d")
     plt.xlabel("Arable land")
@@ -172,7 +182,8 @@ def india_cereal_yield_fitting_prediction():
     df_cereal["India"] = pd.to_numeric(df_cereal["India"])
     df_cereal["Year"] = pd.to_numeric(df_cereal["Year"])
     print(df_cereal)
-    popt, pcorr = opt.curve_fit(exp_growth, df_cereal["Year"], df_cereal["India"], p0 = [4e8, 0.03])
+    popt, pcorr = opt.curve_fit(exp_growth, df_cereal["Year"], \
+                                df_cereal["India"], p0 = [4e8, 0.03])
     print(*popt)
     """ 
     taking the error value
@@ -192,7 +203,7 @@ def india_cereal_yield_fitting_prediction():
     plot the error ranges in the graph
     """
     plt.fill_between(df_cereal["Year"], low, up, alpha = 0.3)
-    plt.title("INDIA(Cereal yield")
+    plt.title("INDIA - CEREAL YIELD")
     plt.legend()
     plt.show()
     """
@@ -220,7 +231,8 @@ def us_cereal_yield_fitting_prediction():
     df_cereal = cereal_yield_t[["Year", "United States"]].copy()
     df_cereal["United States"] = pd.to_numeric(df_cereal["United States"])
     df_cereal["Year"] = pd.to_numeric(df_cereal["Year"])
-    popt, pcorr = opt.curve_fit(exp_growth, df_cereal["Year"], df_cereal["United States"], p0 = [4e8, 0.03])
+    popt, pcorr = opt.curve_fit(exp_growth, df_cereal["Year"],\
+                                df_cereal["United States"], p0 = [4e8, 0.03])
     print(*popt)
 
     sigma = np.sqrt(np.diag(pcorr))
@@ -240,14 +252,14 @@ def us_cereal_yield_fitting_prediction():
     plot the error ranges in the graph
     """
     plt.fill_between(df_cereal["Year"], low, up, alpha=0.3)
-    plt.title("United States(Cereal_yield")
+    plt.title("UNITED STATES - CEREAL YIELD")
     plt.legend(loc = 'upper left')
     plt.show()
     """
     prediction of 2035
     """ 
     plt.figure()
-    plt.title("PREDICTION OF Cereal Yield[2035]")
+    plt.title("PREDICTION OF CEREAL YIELD USA: 2035")
     print("2030:", exp_growth(2030, *popt))
     print("2040:", exp_growth(2040, *popt))
     print("2050:", exp_growth(2050, *popt))
