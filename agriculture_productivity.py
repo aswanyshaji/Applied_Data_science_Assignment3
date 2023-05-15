@@ -10,6 +10,7 @@ from sklearn import cluster
 import errors as err
 import numpy as np
 from scipy.optimize import curve_fit
+import scipy.optimize as opt
 import pandas as pd
 import pandas as pd
 import numpy as np
@@ -19,17 +20,18 @@ import matplotlib.pyplot as plt
 import cluster_tools as ct
 
 def exp_growth(t, scale, growth):
-    """ Computes exponential function with scale and growth as free parameters """
-    f = scale * np.exp(growth * t)
+    """ Computes exponential function with scale and growth as free parameters
+    """
+    f = scale * np.exp(growth * (t-1900))
     return f
 
 def read_clean_transpose(filename):
     """ Read excel file into a data frame, clean the data, and transpose """
     data_frame = pd.read_csv(filename)
     # Make 'Country Name' the index
-    #data_frame.set_index('Country Name', inplace=True)
+    data_frame.set_index('Country Name', inplace=True)
     # Delete unwanted columns
-    data_frame.drop(labels=[ 'Indicator Name', 'Indicator Code'], axis=1, inplace=True)
+    data_frame.drop(labels=[ 'Country Code', 'Indicator Name', 'Indicator Code'], axis=1, inplace=True)
     # Delete empty rows
     data_frame.dropna(axis=0, how='all', thresh=None, subset=None, inplace=True)
     # Delete empty columns
@@ -41,38 +43,18 @@ def read_clean_transpose(filename):
     return data_frame, clean_df_transpose
 
 def agriculture_forest_clustering_analysis():
-    #df_agrar = pd.read_csv("agriculture.csv")
-    #df_forest = pd.read_csv("agriculture_gdp.csv")
-    #print(df_agrar.describe())
-    #print(df_forest.describe())
-    # drop rows with nan's in 2020
-    #agriculture = agriculture[agriculture["2020"].notna()]
-    #forest = forest[forest["2020"].notna()]
-    #print(df_agrar.describe(
-    # alternative way of targetting one or more columns
-    #df_forest = df_forest.dropna(subset=["2020"])
-    #print(df_forest.describe)
-    agriculture_2020 = agriculture[["Country Name", "Country Code", "2020"]].copy()
-    forest_2020 = forest[["Country Name", "Country Code", "2020"]].copy()
+   
+    agriculture.reset_index(inplace=True)
+    forest.reset_index(inplace=True)
+    agriculture_2020 = agriculture[["Country Name", "2020"]].copy()
+    forest_2020 = forest[["Country Name", "2020"]].copy()
     agriculture_2020 = agriculture_2020[agriculture_2020["2020"].notna()]
     forest_2020 = forest_2020[forest_2020["2020"].notna()]
-    #print(df_agr2020.describe())
-    #print(df_for2020.describe())
     agriculture_forest = pd.merge(agriculture_2020, forest_2020, on="Country Name", how="outer")
-    #print(df_2020.describe())
-    #agriculture_forest.to_excel("agr_for2020.xlsx")
-    #print(df_2020.describe())
     agriculture_forest = agriculture_forest.dropna()
     agriculture_forest = agriculture_forest.rename(columns={"2020_x":"agriculture", "2020_y":"forest"})
     agriculture_forest.to_excel("agr_for2020.xlsx")                                              
     agr_forest_cluster = agriculture_forest[["agriculture", "forest"]].copy()                                              
-    # entries with one datum or less are useless.
-    #print()
-    #print(df_2020.describe())
-    # rename columns
-    #df_2020 = df_2020.rename(columns={"2020_x":"agriculture", "2020_y":"forest"})
-    #df_cluster = df_2020[["agriculture", "forest"]].copy()
-    # normalise
     agr_forest_cluster, df_min, df_max = ct.scaler(agr_forest_cluster)
     print("n score")
     # loop over number of clusters
@@ -97,8 +79,6 @@ def agriculture_forest_clustering_analysis():
     #print(df_2020)
     agriculture_forest_sort = agriculture_forest.sort_values("classification")
     agriculture_forest_sort.to_csv("cluster_output.csv")
-    #print(labels)
-
     # extract the estimated cluster centres
     cen = kmeans.cluster_centers_
     #Rescale and show cluster centers
@@ -118,62 +98,43 @@ def agriculture_forest_clustering_analysis():
     plt.show()
 
 def arable_land_cereal_yield_clustering_analysis():
-    #df_agrar = pd.read_csv("agriculture.csv")
-    #df_forest = pd.read_csv("agriculture_gdp.csv")
-    #print(df_agrar.describe())
-    #print(df_forest.describe())
-    # drop rows with nan's in 2020
-    #agriculture = agriculture[agriculture["2020"].notna()]
-    #forest = forest[forest["2020"].notna()]
-    #print(df_agrar.describe(
-    # alternative way of targetting one or more columns
-    #df_forest = df_forest.dropna(subset=["2020"])
-    #print(df_forest.describe)
-    agriculture_2020 = agriculture[["Country Name", "Country Code", "2020"]].copy()
-    forest_2020 = forest[["Country Name", "Country Code", "2020"]].copy()
-    agriculture_2020 = agriculture_2020[agriculture_2020["2020"].notna()]
-    forest_2020 = forest_2020[forest_2020["2020"].notna()]
-    #print(df_agr2020.describe())
-    #print(df_for2020.describe())
-    agriculture_forest = pd.merge(agriculture_2020, forest_2020, on="Country Name", how="outer")
-    #print(df_2020.describe())
-    #agriculture_forest.to_excel("agr_for2020.xlsx")
-    #print(df_2020.describe())
-    agriculture_forest = agriculture_forest.dropna()
-    agriculture_forest = agriculture_forest.rename(columns={"2020_x":"agriculture", "2020_y":"forest"})
-    agriculture_forest.to_excel("agr_for2020.xlsx")                                              
-    agr_forest_cluster = agriculture_forest[["agriculture", "forest"]].copy()                                              
-    # entries with one datum or less are useless.
-    #print()
-    #print(df_2020.describe())
-    # rename columns
-    #df_2020 = df_2020.rename(columns={"2020_x":"agriculture", "2020_y":"forest"})
-    #df_cluster = df_2020[["agriculture", "forest"]].copy()
+
+    arable_land.reset_index(inplace=True)
+    cereal_yield.reset_index(inplace=True)
+    arable_land_2020 = arable_land[["Country Name", "2020"]].copy()
+    cereal_yield_2020 = cereal_yield[["Country Name", "2020"]].copy()
+    arable_land_2020 = arable_land_2020[arable_land_2020["2020"].notna()]
+    cereal_yield_2020 = cereal_yield_2020[cereal_yield_2020["2020"].notna()]
+    arable_vs_cereal = pd.merge(arable_land_2020,  cereal_yield_2020, on="Country Name", how="outer")
+    arable_vs_cereal = arable_vs_cereal.dropna()
+    arable_vs_cereal = arable_vs_cereal.rename(columns={"2020_x":"Arable_land", "2020_y":"Cereal_yield"})
+    arable_vs_cereal.to_excel("cereal_agr2020.xlsx")                                              
+    arable_vs_cereal_cluster = arable_vs_cereal[["Arable_land", "Cereal_yield"]].copy()                                              
     # normalise
-    agr_forest_cluster, df_min, df_max = ct.scaler(agr_forest_cluster)
+    arable_vs_cereal_cluster, df_min, df_max = ct.scaler(arable_vs_cereal_cluster)
     print("n score")
     # loop over number of clusters
     for ncluster in range(2, 10):
         # set up the clusterer with the number of expected clusters
         kmeans = cluster.KMeans(n_clusters=ncluster)
         # Fit the data, results are stored in the kmeans object
-        kmeans.fit(agr_forest_cluster) # fit done on x,y pairs
+        kmeans.fit(arable_vs_cereal_cluster) # fit done on x,y pairs
         labels = kmeans.labels_
         # extract the estimated cluster centres
         cen = kmeans.cluster_centers_
         # calculate the silhoutte score
-        print(ncluster, skmet.silhouette_score(agr_forest_cluster, labels))
+        print(ncluster, skmet.silhouette_score(arable_vs_cereal_cluster, labels))
     
     ncluster = 4
     # set up the clusterer with the number of expected clusters
     kmeans = cluster.KMeans(n_clusters=ncluster)
     # Fit the data, results are stored in the kmeans object
-    kmeans.fit(agr_forest_cluster) # fit done on x,y pairs
+    kmeans.fit(arable_vs_cereal_cluster) # fit done on x,y pairs
     labels = kmeans.labels_
-    agriculture_forest["classification"] = labels
+    arable_vs_cereal["classification"] = labels
     #print(df_2020)
-    agriculture_forest_sort = agriculture_forest.sort_values("classification")
-    agriculture_forest_sort.to_csv("cluster_output.csv")
+    arable_vs_cereal_sort = arable_vs_cereal.sort_values("classification")
+    arable_vs_cereal_sort.to_csv("cluster_output1.csv")
     #print(labels)
 
     # extract the estimated cluster centres
@@ -187,15 +148,21 @@ def arable_land_cereal_yield_clustering_analysis():
     # cluster by cluster
     plt.figure(figsize=(8.0, 8.0))
     cm = plt.cm.get_cmap('tab10')
-    plt.scatter(agriculture_forest["agriculture"], agriculture_forest["forest"], 10, labels, marker="o", cmap=cm, label ='cluster')
+    plt.scatter(arable_vs_cereal["Arable_land"], arable_vs_cereal["Cereal_yield"], 10, labels, marker="o", cmap=cm, label ='cluster')
     plt.scatter(xc, yc, c="k", marker="d", s=80)
     #plt.scatter(xcen, ycen, 45, "k", marker="d")
-    plt.xlabel("agriculture")
-    plt.ylabel("forest")
+    plt.xlabel("Arable land")
+    plt.ylabel("Cereal yield")
     plt.show()
 
-def fitting_prediction():
+
     
+def india_cereal_yield_fitting_prediction():
+    cereal_yield_t.reset_index(inplace=True)
+    df_cereal = cereal_yield_t[["Year", "India"]].copy()
+    df_cereal["India"] = pd.to_numeric(df_cereal["India"])
+    df_cereal["Year"] = pd.to_numeric(df_cereal["Year"])
+    print(df_cereal)
     popt, pcorr = opt.curve_fit(exp_growth, df_cereal["Year"], df_cereal["India"], p0=[4e8, 0.03])
     print(*popt)
     """ 
@@ -215,13 +182,16 @@ def fitting_prediction():
     """
     plot the error ranges in the graph
     """
-    plt.fill_between(df_cereal["Year"],low,up,alpha=0.6)
+    plt.fill_between(df_cereal["Year"],low,up,alpha=0.3)
     plt.title("INDIA(Cereal_yield")
     plt.legend()
     plt.show()
     """
     prediction of 2035
     """ 
+    print("2030:", exp_growth(2030, *popt))
+    print("2040:", exp_growth(2040, *popt))
+    print("2050:", exp_growth(2050, *popt))
     plt.figure()
     plt.title("PREDICTION OF Cereal Yield[2035]")
     pred_year = np.arange(1960,2035)
@@ -230,14 +200,59 @@ def fitting_prediction():
     plt.plot(pred_year,pred_ind,label="prediction")
     plt.legend()
     plt.show()
+    
+def us_cereal_yield_fitting_prediction(): 
+    cereal_yield_t.reset_index(inplace=True)
+    df_cereal = cereal_yield_t[["Year", "United States"]].copy()
+    df_cereal["United States"] = pd.to_numeric(df_cereal["United States"])
+    df_cereal["Year"] = pd.to_numeric(df_cereal["Year"])
+    popt, pcorr = opt.curve_fit(exp_growth, df_cereal["Year"], df_cereal["United States"], p0=[4e8, 0.03])
+    print(*popt)
+
+    sigma = np.sqrt(np.diag(pcorr))
+    """
+    low and up values for error ranges
+    """
+    low,up = err.err_ranges(df_cereal["Year"],exp_growth,popt,sigma)
+    """
+    data fitting
+    """
+    df_cereal["cerel_yield_exp"] = exp_growth(df_cereal["Year"], *popt)
+    plt.plot(df_cereal["Year"], df_cereal["United States"], label="data")
+    plt.plot(df_cereal["Year"], df_cereal["cerel_yield_exp"], label="fit")
+    """
+    plot the error ranges in the graph
+    """
+    plt.fill_between(df_cereal["Year"],low,up,alpha=0.6)
+    plt.title("United States(Cereal_yield")
+    plt.legend()
+    plt.show()
+    """
+    prediction of 2035
+    """ 
+    plt.figure()
+    plt.title("PREDICTION OF Cereal Yield[2035]")
+    print("2030:", exp_growth(2030, *popt))
+    print("2040:", exp_growth(2040, *popt))
+    print("2050:", exp_growth(2050, *popt))
+    pred_year = np.arange(1960,2035)
+    pred_ind = exp_growth(pred_year,*popt)
+    plt.plot(df_cereal["Year"],df_cereal["United States"],label="data")
+    plt.plot(pred_year,pred_ind,label="prediction")
+    plt.legend()
+    plt.show()
 
 if __name__ == "__main__":
     # Call the function to clean and transpose the data
     cereal_yield, cereal_yield_t = read_clean_transpose('cereal_yield.csv')
+    cereal_yield_t.to_csv("m.csv")
+    cereal_yield_t.to_csv('cereal_trans.csv')
     agriculture, agriculture_t = read_clean_transpose('agriculture.csv')
     forest, forest_t = read_clean_transpose('forest.csv')
     arable_land, arable_land_t = read_clean_transpose('arable_land.csv')
     agriculture_forest_clustering_analysis()
     arable_land_cereal_yield_clustering_analysis()
+    india_cereal_yield_fitting_prediction()
+    us_cereal_yield_fitting_prediction()
     
     
