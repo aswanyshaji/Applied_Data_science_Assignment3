@@ -104,9 +104,12 @@ def agriculture_forest_clustering_analysis():
     plt.scatter(agriculture_forest["agriculture"], agriculture_forest["forest"]\
                         , 20, labels, marker = "o", cmap = cm, label ='cluster')
     plt.scatter(xc, yc, c = "k", marker = "d", s = 100)
-    plt.title("CLUSTERING ANALYSIS OF AGRICULTURE VS FOREST", fontsize = 16)
+    plt.title("CLUSTERING ANALYSIS OF AGRICULTURE VS FOREST", fontsize = 18, \
+                                                          fontweight = 'bold')
     plt.xlabel("Agriculture land", fontsize = 15, fontweight = 'bold')
     plt.ylabel("Forest Land", fontsize = 15, fontweight = 'bold')
+    plt.tight_layout()
+    plt.savefig("agr_for.png", dpi = 300)
     plt.show()
     
     
@@ -167,11 +170,13 @@ def arable_land_cereal_yield_clustering_analysis():
     plt.scatter(arable_vs_cereal["Arable_land"], arable_vs_cereal["Cereal_yield"],\
                             10, labels, marker = "o", cmap = cm, label ='cluster')
     plt.scatter(xc, yc, c = "k", marker = "d", s = 80)
-    plt.title("CLUSTERING ANALYSIS OF ARABLE LAND VS CEREAL YIELD", fontsize = 16)
+    plt.title("CLUSTERING ANALYSIS OF ARABLE LAND VS CEREAL YIELD", fontsize = 18, fontweight = 'bold')
     plt.xlabel("Arable land", fontsize = 15, fontweight = 'bold')
     plt.ylabel("Cereal yield", fontsize = 15, fontweight = 'bold')
+    plt.tight_layout()
+    plt.savefig("cer_arab.png", dpi = 300)
     plt.show()
-
+    
     
 def india_cereal_yield_fitting_prediction():
     """ 
@@ -198,15 +203,20 @@ def india_cereal_yield_fitting_prediction():
     data fitting
     """
     df_cereal["cerel_yield_exp"] = exp_growth(df_cereal["Year"], *popt)
+    plt.figure()
     plt.plot(df_cereal["Year"], df_cereal["India"], label = "data")
     plt.plot(df_cereal["Year"], df_cereal["cerel_yield_exp"], label = "fit")
     """
     plot the error ranges in the graph
     """
+    
     plt.fill_between(df_cereal["Year"], low, up, alpha = 0.3, label = "Error Ranges")
     plt.title("INDIA - CEREAL YIELD")
     plt.legend()
+    plt.tight_layout()
+    plt.savefig("ind_cer.png", dpi = 300)
     plt.show()
+    
     """
     prediction of 2035
     """ 
@@ -220,6 +230,8 @@ def india_cereal_yield_fitting_prediction():
     plt.plot(df_cereal["Year"], df_cereal["India"], label = "Data")
     plt.plot(pred_year,pred_ind,label = "Prediction")
     plt.legend()
+    plt.tight_layout()
+    plt.savefig("ind_cer_pre.png", dpi = 300)
     plt.show()
     
     
@@ -252,10 +264,14 @@ def us_cereal_yield_fitting_prediction():
     """
     plot the error ranges in the graph
     """
+
     plt.fill_between(df_cereal["Year"], low, up, alpha=0.3, label = "Error Ranges")
     plt.title("UNITED STATES - CEREAL YIELD")
     plt.legend(loc = 'upper left')
+    plt.tight_layout()
+    plt.savefig("us_cer.png", dpi = 300)
     plt.show()
+    
     """
     prediction of 2035
     """ 
@@ -269,7 +285,10 @@ def us_cereal_yield_fitting_prediction():
     plt.plot(df_cereal["Year"], df_cereal["United States"], label = "data")
     plt.plot(pred_year, pred_ind, label = "prediction")
     plt.legend()
+    plt.tight_layout()
+    plt.savefig("us_cer_pred.png", dpi = 300)
     plt.show()
+    
 
 if __name__ == "__main__":
     # Call the function to clean and transpose the data
