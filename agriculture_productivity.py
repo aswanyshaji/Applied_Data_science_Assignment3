@@ -5,7 +5,6 @@ Created on Sun May 10 01:15:44 2023
 @author: ASWANY SHAJI
 """
 
-import seaborn as sns
 from sklearn import cluster
 import errors as err
 import numpy as np
@@ -69,7 +68,9 @@ def agriculture_forest_clustering_analysis():
                                     {"2020_x":"agriculture", "2020_y":"forest"})
     agriculture_forest.to_excel("agr_for2020.xlsx")                                              
     agr_forest_cluster = agriculture_forest[["agriculture", "forest"]].copy()
-    #perform normalization before clustering                                              
+    """
+    perform normalization before clustering   
+    """                                           
     agr_forest_cluster, df_min, df_max = ct.scaler(agr_forest_cluster)
     # loop over number of clusters to find out best silhouette score
     for ncluster in range(2, 10):
@@ -91,10 +92,13 @@ def agriculture_forest_clustering_analysis():
     #create a new column and add cluster number corresponding to each Country
     agriculture_forest["classification"] = labels
     agriculture_forest_sort = agriculture_forest.sort_values("classification")
+    #store the data frame to a csv file for detailed analysis
     agriculture_forest_sort.to_csv("cluster_output.csv")
     # extract the estimated cluster centres
     cen = kmeans.cluster_centers_
-    #Rescale and show cluster centers(Back Scaling)
+    """
+    Rescale and show cluster centers(Back Scaling)
+    """
     scen = ct.backscale(cen, df_min, df_max)
     xc = scen[:, 0]
     yc = scen[:, 1]
@@ -111,6 +115,7 @@ def agriculture_forest_clustering_analysis():
     plt.tight_layout()
     plt.savefig("agr_for.png", dpi = 300)
     plt.show()
+    return
     
     
 def arable_land_cereal_yield_clustering_analysis():
@@ -151,11 +156,8 @@ def arable_land_cereal_yield_clustering_analysis():
     kmeans.fit(arable_vs_cereal_cluster) # fit done on x,y pairs
     labels = kmeans.labels_
     arable_vs_cereal["classification"] = labels
-    #print(df_2020)
     arable_vs_cereal_sort = arable_vs_cereal.sort_values("classification")
     arable_vs_cereal_sort.to_csv("cluster_output1.csv")
-    #print(labels)
-
     # extract the estimated cluster centres
     cen = kmeans.cluster_centers_
     #Rescale and show cluster centers
@@ -170,13 +172,14 @@ def arable_land_cereal_yield_clustering_analysis():
     plt.scatter(arable_vs_cereal["Arable_land"], arable_vs_cereal["Cereal_yield"],\
                             10, labels, marker = "o", cmap = cm, label ='cluster')
     plt.scatter(xc, yc, c = "k", marker = "d", s = 80)
-    plt.title("CLUSTERING ANALYSIS OF ARABLE LAND VS CEREAL YIELD", fontsize = 18, fontweight = 'bold')
+    plt.title("CLUSTERING ANALYSIS OF ARABLE LAND VS CEREAL YIELD", \
+                                             fontsize = 18, fontweight = 'bold')
     plt.xlabel("Arable land", fontsize = 15, fontweight = 'bold')
-    plt.ylabel("Cereal yield", fontsize = 15, fontweight = 'bold')
+    plt.ylabel("Cereal yield(kg/Hectare)", fontsize = 15, fontweight = 'bold')
     plt.tight_layout()
     plt.savefig("cer_arab.png", dpi = 300)
     plt.show()
-    
+    return
     
 def india_cereal_yield_fitting_prediction():
     """ 
@@ -206,6 +209,7 @@ def india_cereal_yield_fitting_prediction():
     plt.figure()
     plt.plot(df_cereal["Year"], df_cereal["India"], label = "data")
     plt.plot(df_cereal["Year"], df_cereal["cerel_yield_exp"], label = "fit")
+    plt.ylabel("Cereal Yield (kg/Hectare)")
     """
     plot the error ranges in the graph
     """
@@ -229,10 +233,12 @@ def india_cereal_yield_fitting_prediction():
     pred_ind = exp_growth(pred_year, *popt)
     plt.plot(df_cereal["Year"], df_cereal["India"], label = "Data")
     plt.plot(pred_year,pred_ind,label = "Prediction")
+    plt.ylabel("Cereal Yield (kg/Hectare)")
     plt.legend()
     plt.tight_layout()
     plt.savefig("ind_cer_pre.png", dpi = 300)
     plt.show()
+    return
     
     
 def us_cereal_yield_fitting_prediction(): 
@@ -260,6 +266,7 @@ def us_cereal_yield_fitting_prediction():
     df_cereal["cerel_yield_exp"] = exp_growth(df_cereal["Year"], *popt)
     plt.plot(df_cereal["Year"], df_cereal["United States"], label = "Data")
     plt.plot(df_cereal["Year"], df_cereal["cerel_yield_exp"], label = "Fit")
+    plt.ylabel("Cereal Yield (kg/Hectare)")
     
     """
     plot the error ranges in the graph
@@ -284,10 +291,12 @@ def us_cereal_yield_fitting_prediction():
     pred_ind = exp_growth(pred_year, *popt)
     plt.plot(df_cereal["Year"], df_cereal["United States"], label = "data")
     plt.plot(pred_year, pred_ind, label = "prediction")
+    plt.ylabel("Cereal Yield (kg/Hectare)")
     plt.legend()
     plt.tight_layout()
     plt.savefig("us_cer_pred.png", dpi = 300)
     plt.show()
+    return
     
 
 if __name__ == "__main__":
