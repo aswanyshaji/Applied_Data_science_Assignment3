@@ -172,7 +172,7 @@ def arable_land_cereal_yield_clustering_analysis():
     plt.scatter(arable_vs_cereal["Arable_land"], arable_vs_cereal["Cereal_yield"],\
                             10, labels, marker = "o", cmap = cm, label ='cluster')
     plt.scatter(xc, yc, c = "k", marker = "d", s = 80)
-    plt.title("CLUSTERING ANALYSIS OF ARABLE LAND VS CEREAL YIELD", \
+    plt.title("ARABLE LAND VS CEREAL YIELD", \
                                              fontsize = 18, fontweight = 'bold')
     plt.xlabel("Arable land", fontsize = 15, fontweight = 'bold')
     plt.ylabel("Cereal yield(kg/Hectare)", fontsize = 15, fontweight = 'bold')
